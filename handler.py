@@ -3,6 +3,9 @@ import json
 import jinja2
 import os
 
+#app module
+import model
+
 jinja_environment = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)+"/template"))
 
@@ -22,19 +25,7 @@ class AjaxHandler(webapp2.RequestHandler):
             { "url" : "ajax-grid",     "name" : "Ajax Grid" },
             { "url" : "angular-ui",    "name" : "Angular UI" },
         ],
-        "grid": {
-            "head": [
-                {"key":"name", "desc":"Name"},
-                {"key":"creator", "desc":"Creator"},
-                {"key":"engine", "desc":"Engine"},
-                {"key":"license", "desc":"Software License"},
-            ],
-            "body": [
-                {"name":"Chrome",  "creator":"Google", "engine":"Webkit", "license":"BSD"},
-                {"name":"Firefox", "creator":"Mozilla", "engine":"Gecko", "license":"MPL/GPL/LGPL"},
-                {"name":"Internet Explorer", "creator":"Microsoft", "engine":"Trident", "license":"Proprietary"},
-            ]
-        },
+        "grid": model.get_browsers(),
     } 
 
     def get(self):
@@ -70,16 +61,13 @@ class AjaxGridHandler(webapp2.RequestHandler):
         self.response.out.write(template.render(template_values))
 
 class StaticGridHandler(webapp2.RequestHandler):
-    data = [
-             {"name":"Chrome",  "creator":"Google", "engine":"Webkit", "license":"BSD"},
-             {"name":"Firefox", "creator":"Mozilla", "engine":"Gecko", "license":"MPL/GPL/LGPL"},
-             {"name":"Internet Explorer", "creator":"Microsoft", "engine":"Trident", "license":"Proprietary"},
-    ]
-
     def get(self):
+        #get browser data from model
+        browsers = model.get_browsers()
+
         template_values = {
                 'project_name': "BAG Python",
-                "data": self.data
+                "data": browsers["body"]
         }
 
         template = jinja_environment.get_template('grid.tpl')
@@ -168,6 +156,9 @@ class FluidHandler(webapp2.RequestHandler):
 
 class IndexHandler(webapp2.RequestHandler):
     def get(self):
+        #initiate data for grid page
+        model.init_browsers()
+
         template_values = {
                 'project_name': "BAG Python"
         }
